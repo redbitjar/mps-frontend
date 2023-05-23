@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import ReactFlow, {
+  MarkerType,
   addEdge,
   applyEdgeChanges,
   applyNodeChanges,
@@ -121,6 +122,13 @@ const initialEdges = [
 
 const nodeTypes = { textUpdater: CustomNode };
 
+const defaultEdgeOptions = {  
+  markerEnd: {
+    type: MarkerType.ArrowClosed,
+    color: 'black',
+  },
+};
+
 function Flow() {
   const [nodes, setNodes] = useState(initialNodes);
   const [edges, setEdges] = useState(initialEdges);
@@ -139,9 +147,11 @@ function Flow() {
   );
 
   return (
+    
     <ReactFlow
       nodes={nodes}
       edges={edges}
+      defaultEdgeOptions={defaultEdgeOptions}
       onNodesChange={onNodesChange}
       onEdgesChange={onEdgesChange}
       onConnect={onConnect}
