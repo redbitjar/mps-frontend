@@ -11,15 +11,15 @@ import CustomNode from "./pages/CustomNode";
 function App() {
   return (
     <div className="App">
-        <ResponsiveAppBar />
-        <Routes>
-          <Route path="/main" element={<Main />} />
-          <Route path="/Gantt" element={<GanttPage />} />
-          {/* <Route path="/Pert" element={<PertPage />} /> */}
-          <Route path="/Pert" element={<CustomNode />} />
-          <Route path="/" element={<Navigate replace to="/main" />} />
-          <Route path="/sample" element={<CustomAxiosSp01 />} />
-        </Routes>
+      <ResponsiveAppBar />
+      <Routes>
+        <Route path="/main" element={<Main />} />
+        <Route path="/Gantt" element={<GanttPage />} />
+        {/* <Route path="/Pert" element={<PertPage />} /> */}
+        <Route path="/Pert" element={<CustomNode />} />
+        <Route path="/" element={<Navigate replace to="/main" />} />
+        <Route path="/sample" element={<CustomAxiosSp01 />} />
+      </Routes>
     </div>
   );
 }

@@ -14,6 +14,7 @@ import "reactflow/dist/style.css";
 import { initialNodes, initialEdges } from "./networkData";
 
 import CustomNode from "./CustomNode.js";
+import CustomEdge2 from "./CustomEdge2";
 
 import "./CustomNode.css";
 
@@ -22,9 +23,13 @@ const rfStyle = {
 };
 
 const nodeTypes = { cpm: CustomNode };
+const edgeTypes = {
+  custom: CustomEdge2,
+};
 
 const defaultEdgeOptions = {
   labelBgStyle: { fill: "transparent" },
+  type: "custom",
   markerEnd: {
     type: MarkerType.ArrowClosed,
     color: "black",
@@ -47,17 +52,25 @@ function Flow(props) {
     },
     [setEdges]
   );
+  const onChange = (e) => {
+    console.log(e.target.value);
+  };
   const onConnect = useCallback(
     (connection) => {
       console.log(connection);
       console.log(nodes);
       console.log(edges);
       console.log(edgess);
-      debugger;
       const source = nodes.find((n) => n.id === connection.source);
       const target = nodes.find((n) => n.id === connection.target);
       const diffDay = target.data.est - source.data.est;
       connection.label = diffDay;
+      connection.data = {
+        ...connection.data,
+        label: diffDay,
+        onChange: onChange,
+      };
+      connection.onChange = onChange;
       if (source.data.workDate > target.data.workDate) return;
       setEdges((eds) => {
         return addEdge(connection, eds);
@@ -82,6 +95,7 @@ function Flow(props) {
           {...props}
           nodes={nodes}
           edges={edges}
+          edgeTypes={edgeTypes}
           defaultEdgeOptions={defaultEdgeOptions}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
