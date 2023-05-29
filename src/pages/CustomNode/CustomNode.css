@@ -3,19 +3,25 @@
   border: 1px solid #eee;
   padding: 5px;
   border-radius: 5px;
-  background: white;    
+  background: white;
 }
-.custom-wrap{
+.custom-wrap {
   display: grid;
   grid-template-columns: 30px 30px;
   grid-auto-rows: 15px;
   /* grid-template-rows: repeat(3, minmax(15px, auto)); */
 }
 
-.div1, .div2, .div3, .div4, .div5, .div6{
+.div1,
+.div2,
+.div3,
+.div4,
+.div5,
+.div6 {
   border: 1px solid #eee;
   font-size: 6px;
 }
-.div3, .div4{
+.div3,
+.div4 {
   grid-column: 1/3;
 }
