@@ -102,6 +102,20 @@ const cpmChildRerender = function (copiedNodes, edges, nodeConEdges) {
       };
     }
 
+    for (let conEdge of newRootNodeConEdges) {
+      const idx = copiedNodes.findIndex((e) => conEdge.target === e.id);
+      if (
+        copiedNodes[idx].data.lst !==
+        Number(conEdge.sourceLst) + Number(conEdge.label)
+      ) {
+        const sourceIdx = copiedNodes.findIndex((e) => conEdge.source === e.id);
+        copiedNodes[sourceIdx].data = {
+          ...copiedNodes[sourceIdx].data,
+          lst: copiedNodes[idx].data.lst - Number(conEdge.label),
+        };
+      }
+    }
+
     cpmChildRerender(copiedNodes, edges, newRootNodeConEdges);
   }
 
