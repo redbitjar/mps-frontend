@@ -1,18 +1,12 @@
 import { useCallback } from "react";
+
 import { Handle, Position } from "reactflow";
 
 const handleStyle = { left: 10 };
 
-function CustomNode({ data, isConnectable }) {
-  // console.log("data");
-  // console.log(data);
-  // console.log(isConnectable);
-  // const onChange = useCallback((evt) => {
-  //   console.log(evt.target.value);
-  // }, []);
-
+function CustomNode2({ data, isConnectable }) {
   return (
-    <div className="text-updater-node">
+    <div className="text-updater-node main">
       <Handle
         type="target"
         position={Position.Top}
@@ -35,4 +29,4 @@ function CustomNode({ data, isConnectable }) {
   );
 }
 
-export default CustomNode;
+export default CustomNode2;

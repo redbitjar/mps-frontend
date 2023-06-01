@@ -17,8 +17,7 @@ function CustomEdge2({
   data,
   style = {},
   markerEnd,
-  onChange,
-  props,
+  label,
 }) {
   const [edgePath, labelX, labelY] = getBezierPath({
     sourceX,
@@ -28,7 +27,7 @@ function CustomEdge2({
     targetY,
     targetPosition,
   });
-  const [text, setText] = useState("a");
+
   return (
     <>
       {/* <path id={id} className="react-flow__edge-path" d={edgePath} /> */}
@@ -38,16 +37,28 @@ function CustomEdge2({
           style={{
             position: "absolute",
             transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
-            background: "#ffcc00",
+            // background: "#ffcc00",
             padding: 10,
             borderRadius: 5,
-            fontSize: 12,
-            fontWeight: 700,
+            fontSize: 8,
+            // fontWeight: 700,
+            pointerEvents: "all",
           }}
           className="nodrag nopan"
         >
-          <input value={text} />
-          {/* <input value={data.label} onChange={data.onChange} /> */}
+          {/* <input value={text} onChange={onChange2} className="nodrag nopan" /> */}
+          {/* <button
+className="edgebutton"
+onClick={(event) => onEdgeClick(event, id)}
+>
+×
+</button> */}
+          {/* <input value={text} onChange={onChange} style={{ width: `20px` }} /> */}
+          <input
+            value={data.label || ""}
+            onChange={(e) => data.onChange(e)}
+            style={{ width: `20px` }}
+          />
           {/* {data.label} */}
         </div>
       </EdgeLabelRenderer>
