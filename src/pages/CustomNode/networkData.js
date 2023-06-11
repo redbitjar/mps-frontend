@@ -159,101 +159,101 @@ export const initialNodes = [
     dragging: false,
   },
 
-  {
-    id: "DF62P",
-    type: "cpm",
-    position: {
-      x: -402.5,
-      y: 34.5,
-    },
+  // {
+  //   id: "DF62P",
+  //   type: "cpm",
+  //   position: {
+  //     x: -402.5,
+  //     y: 34.5,
+  //   },
 
-    data: {
-      est: 0,
-      lst: 0,
-      blockName: "DF62P",
-      workDate: "",
-    },
-    width: 72,
-    height: 57,
-    selected: false,
-    positionAbsolute: {
-      x: -402.5,
-      y: 34.5,
-    },
-    dragging: false,
-  },
-  {
-    id: "DF71C",
-    type: "cpm",
-    position: {
-      x: -192.5,
-      y: 117,
-    },
+  //   data: {
+  //     est: 0,
+  //     lst: 0,
+  //     blockName: "DF62P",
+  //     workDate: "",
+  //   },
+  //   width: 72,
+  //   height: 57,
+  //   selected: false,
+  //   positionAbsolute: {
+  //     x: -402.5,
+  //     y: 34.5,
+  //   },
+  //   dragging: false,
+  // },
+  // {
+  //   id: "DF71C",
+  //   type: "cpm",
+  //   position: {
+  //     x: -192.5,
+  //     y: 117,
+  //   },
 
-    data: {
-      est: 0,
-      lst: 0,
-      blockName: "DF71C",
-      workDate: "",
-    },
+  //   data: {
+  //     est: 0,
+  //     lst: 0,
+  //     blockName: "DF71C",
+  //     workDate: "",
+  //   },
 
-    width: 72,
-    height: 57,
-    selected: true,
-    positionAbsolute: {
-      x: -192.5,
-      y: 117,
-    },
-    dragging: false,
-  },
+  //   width: 72,
+  //   height: 57,
+  //   selected: true,
+  //   positionAbsolute: {
+  //     x: -192.5,
+  //     y: 117,
+  //   },
+  //   dragging: false,
+  // },
 
-  {
-    id: "DF72P",
-    type: "cpm",
-    position: {
-      x: -291.5,
-      y: 119.20000000000005,
-    },
+  // {
+  //   id: "DF72P",
+  //   type: "cpm",
+  //   position: {
+  //     x: -291.5,
+  //     y: 119.20000000000005,
+  //   },
 
-    data: {
-      est: 0,
-      lst: 0,
-      blockName: "DF72P",
-      workDate: "",
-    },
-    width: 72,
-    height: 57,
-    selected: false,
-    positionAbsolute: {
-      x: -291.5,
-      y: 119.20000000000005,
-    },
-    dragging: false,
-  },
+  //   data: {
+  //     est: 0,
+  //     lst: 0,
+  //     blockName: "DF72P",
+  //     workDate: "",
+  //   },
+  //   width: 72,
+  //   height: 57,
+  //   selected: false,
+  //   positionAbsolute: {
+  //     x: -291.5,
+  //     y: 119.20000000000005,
+  //   },
+  //   dragging: false,
+  // },
 
-  {
-    id: "DF73P",
-    type: "cpm",
-    position: {
-      x: -409,
-      y: 114.5,
-    },
+  // {
+  //   id: "DF73P",
+  //   type: "cpm",
+  //   position: {
+  //     x: -409,
+  //     y: 114.5,
+  //   },
 
-    data: {
-      est: 0,
-      lst: 0,
-      blockName: "DF73P",
-      workDate: "",
-    },
-    width: 72,
-    height: 57,
-    selected: false,
-    positionAbsolute: {
-      x: -409,
-      y: 114.5,
-    },
-    dragging: false,
-  },
+  //   data: {
+  //     est: 0,
+  //     lst: 0,
+  //     blockName: "DF73P",
+  //     workDate: "",
+  //   },
+  //   width: 72,
+  //   height: 57,
+  //   selected: false,
+  //   positionAbsolute: {
+  //     x: -409,
+  //     y: 114.5,
+  //   },
+  //   dragging: false,
+  // },
 ];
 
 export const initialEdges = [

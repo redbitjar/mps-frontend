@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+
 import _ from "lodash";
 
 import ReactFlow, {
@@ -13,13 +14,14 @@ import ReactFlow, {
   useNodesState,
   useOnSelectionChange,
 } from "reactflow";
+
 import "reactflow/dist/style.css";
+
 import { initialNodes, initialEdges } from "./networkData";
 import CustomNode from "./CustomNode.js";
 import CustomEdge2 from "./CustomEdge2";
 import "./CustomNode.css";
 import CustomNode2 from "./CustomNode2";
-import { Button } from "@mui/material";
 
 const rfStyle = {
   backgroundColor: "#B8CEFF",
@@ -35,154 +37,103 @@ const defaultEdgeOptions = {
   type: "custom",
   markerEnd: {
     type: MarkerType.ArrowClosed,
-
     color: "black",
   },
 };
 
-const cpmChildRerender = function (copiedNodes, edges, nodeConEdges) {
-  console.log(copiedNodes);
-  console.log(edges);
-  console.log(nodeConEdges);
+// let copiedNodes = [];
 
-  let sourceNodes = nodeConEdges.map((nce) => {
-    return copiedNodes.find((cn) => cn.id === nce.target);
-  });
+let reRendreNodes = [];
+let criticalPath = [];
+// copiedNodes = _.cloneDeep(initialNodes);
 
-  let sourceNextEdges = [];
+function nodesConnectEdges(edges) {
+  // console.log("nodesConnectEdges---------start");
+  // // console.log("reRendreNodes : ", nodes);
+  // console.log("reRendreNodes : ", reRendreNodes);
+  // console.log("edges : ", edges);
+  // console.log("nodesConnectEdges---------end");
+  // debugger;
 
-  sourceNodes.forEach((sn) => {
-    const es = edges.filter((eg) => eg.source === sn.id);
-    sourceNextEdges = [...sourceNextEdges, ...es];
-  });
+  // 1. 엣지 검색
+  // let connectedEdges = edges.filter(f => f.soruce === parentNode.id)
+  // 2. reRendreNodes부터 타겟 노드 검색
+  // 3. reRendreNodes에 parent Node 검색
+  // 3.1 parent Node 정보 수정
+  // 3.2 target 노드 배열 추가
+  // 3.3 edge label 정보 추가
+  // reRendreNodes
 
-  let newRootNodeConEdges = [];
+  for (let _node of reRendreNodes) {
+    _node.targetEdges = [];
+    _node.targetNodes = [];
+    _node.prevEdges = [];
+    _node.prevNodes = [];
 
-  if (sourceNextEdges.length > 0) {
-    newRootNodeConEdges = sourceNextEdges.map((sbNode) => {
-      let parentNode = copiedNodes.find((n) => n.id === sbNode.source);
+    for (let _edges of edges) {
+      if (_edges.source === _node.id) {
+        _node.targetEdges.push(_edges);
 
-      return {
-        sourceEst: parentNode.data.est || 0,
-        sourceLst: parentNode.data.lst || 0,
-        sourceWorkDate: parentNode.data.workDate,
-        source: sbNode.source,
-        target: sbNode.target,
-        label: sbNode.data.label,
-      };
-    });
+        _node.targetNodes.push(
+          reRendreNodes.find((f) => f.id === _edges.target)
+        );
+      } else if (_edges.target === _node.id) {
+        _node.prevEdges.push(_edges);
 
-    for (let conEdge of newRootNodeConEdges) {
-      const idx = copiedNodes.findIndex((e) => conEdge.target === e.id);
-
-      copiedNodes[idx].data = {
-        ...copiedNodes[idx].data,
-        est: 0,
-        lst: 0,
-      };
-    }
-
-    for (let conEdge of newRootNodeConEdges) {
-      const idx = copiedNodes.findIndex((e) => conEdge.target === e.id);
-
-      copiedNodes[idx].data = {
-        ...copiedNodes[idx].data,
-
-        est:
-          copiedNodes[idx].data.est >=
-          Number(conEdge.sourceEst) + Number(conEdge.label)
-            ? copiedNodes[idx].data.est
-            : Number(conEdge.sourceEst) + Number(conEdge.label),
-
-        lst:
-          copiedNodes[idx].data.lst >=
-          Number(conEdge.sourceLst) + Number(conEdge.label)
-            ? copiedNodes[idx].data.lst
-            : Number(conEdge.sourceLst) + Number(conEdge.label),
-      };
-    }
-
-    for (let conEdge of newRootNodeConEdges) {
-      const idx = copiedNodes.findIndex((e) => conEdge.target === e.id);
-      if (
-        copiedNodes[idx].data.lst !==
-        Number(conEdge.sourceLst) + Number(conEdge.label)
-      ) {
-        const sourceIdx = copiedNodes.findIndex((e) => conEdge.source === e.id);
-        copiedNodes[sourceIdx].data = {
-          ...copiedNodes[sourceIdx].data,
-          lst: copiedNodes[idx].data.lst - Number(conEdge.label),
-        };
+        _node.prevNodes.push(reRendreNodes.find((f) => f.id === _edges.source));
       }
     }
-
-    cpmChildRerender(copiedNodes, edges, newRootNodeConEdges);
   }
+}
 
-  // const copy3 = _.cloneDeep(nodeConEdges);
-  // if (rootNode && rootNodeConEdges.length > 0) {
-  // newRootNodeConEdges = rootNodeConEdges.map((sbNode) => {
-  // return {
-  // sourceEst: rootNode.data.est && 0,
-  // sourceLst: rootNode.data.lst && 0,
-  // sourceWorkDate: rootNode.data.workDate,
-  // source: sbNode.source,
-  // target: sbNode.target,
-  // label: sbNode.data.label,
+function nodesRerender(sourceNode, parentIndex) {
+  let { id, data, prevEdges, prevNodes, targetEdges, targetNodes } = sourceNode;
+  const { est: sourceEst, lst: sourceLst, workDate } = data;
 
-  // };
+  targetNodes.forEach((_targetNode, _idx) => {
+    // const label = targetEdges[_idx].data.label;
+    // let maxEst = Number(label || 0) + sourceEst;
+    // let maxlst = Number(label || 0) + sourceLst
 
-  // });
+    let maxEst = Number.MIN_SAFE_INTEGER;
+    let maxLst = Number.MIN_SAFE_INTEGER;
 
-  // debugger;
-};
+    const { prevEdges: tPrevEdges, prevNodes: tPrevNodes } = _targetNode;
+    tPrevNodes.forEach((_tPrevNode, _tPrevIdx) => {
+      const { est: prevEst, lst: prevLst } = _tPrevNode.data;
+      const { label: prevLabel } = tPrevEdges[_tPrevIdx].data;
+      const _tempEst = Number(prevEst) + Number(prevLabel || 0);
+      const _tempLst = Number(prevLst) + Number(prevLabel || 0);
 
-const cpmRerender = function (nodes, edges) {
-  let copiedNodes = [...nodes];
-  const rootNode = copiedNodes.find((n) => n.type === "cpmMain");
-  const rootNodeConEdges = edges.filter((e) => e.source === rootNode.id);
-  let newRootNodeConEdges = [];
-
-  if (rootNode && rootNodeConEdges.length > 0) {
-    newRootNodeConEdges = rootNodeConEdges.map((sbNode) => {
-      return {
-        sourceEst: rootNode.data.est || 0,
-        sourceLst: rootNode.data.lst || 0,
-        sourceWorkDate: rootNode.data.workDate,
-        source: sbNode.source,
-        target: sbNode.target,
-        label: sbNode.data.label,
-      };
+      maxEst = _tempEst > maxEst ? _tempEst : maxEst;
+      maxLst = _tempLst > maxLst ? _tempLst : maxLst;
     });
 
     // debugger;
 
-    for (let conEdge of newRootNodeConEdges) {
-      const idx = copiedNodes.findIndex((e) => conEdge.target === e.id);
+    _targetNode.data = {
+      ..._targetNode.data,
+      est: maxEst,
+      lst: maxLst,
+    };
 
-      copiedNodes[idx].data = {
-        ...copiedNodes[idx].data,
-        est: Number(conEdge.sourceEst) + Number(conEdge.label),
-        lst: Number(conEdge.sourceLst) + Number(conEdge.label),
-      };
-    }
-  } else {
-    alert("루트 로드가 연결되지 않았습니다.");
-  }
-
-  cpmChildRerender(copiedNodes, edges, newRootNodeConEdges);
-
-  return copiedNodes;
-};
+    nodesRerender(_targetNode);
+  });
+}
 
 function Flow(props) {
-  const [nodes, setNodes] = useNodesState(initialNodes);
+  const [nodes, setNodes] = useNodesState([]);
   const [edges, setEdges] = useEdgesState([]);
-  const [curConnect, setCurConnect] = useState({});
+
+  useEffect(() => {
+    // copiedNodes = _.cloneDeep(initialNodes);
+    // setNodes(copiedNodes);
+
+    setNodes([...initialNodes]);
+  }, []);
 
   const onNodesChange = useCallback(
     (changes) => setNodes((nds) => applyNodeChanges(changes, nds)),
-
     [setNodes]
   );
 
@@ -194,8 +145,46 @@ function Flow(props) {
     [setEdges]
   );
 
-  const onChange = (e) => {
+  const onIncrease = useCallback((e) => {
+    // console.log("onIncrease start");
+    // console.log("nodes : ", nodes);
+    // console.log("edges : ", edges);
+    // console.log("onIncrease end");
+    console.log("criticalPath : ", criticalPath);
+
+    // debugger;
+  });
+
+  const onNodeRerenderClick = useCallback((e) => {
+    // console.log("onNodeRerenderClick start");
+    // console.log("nodes : ", nodes);
+    // console.log("edges : ", edges);
+    // // console.log("copiedNodes : ", copiedNodes);
+    // console.log("onNodeRerenderClick end");
+    // 첫노드 찾기, reRendreNodes 재구성
+    // const rootNode = nodes.find((n) => n.type === "cpmMain");
+
+    reRendreNodes = _.cloneDeep(nodes);
+
+    // console.log(reRendreNodes);
+    // debugger;
+
+    nodesConnectEdges(edges);
+
+    // console.log(reRendreNodes);
+    // debugger;
+
+    const rootNodeIndex = reRendreNodes.findIndex((n) => n.type === "cpmMain");
+    const rootNode = reRendreNodes[rootNodeIndex];
+
+    nodesRerender(rootNode, rootNodeIndex);
+    setNodes(reRendreNodes);
+  });
+
+  const onChange = useCallback((e, edges) => {
     const tValue = e.target.value;
+
+    console.log("onChange edges: ", edges);
 
     setEdges((prev) => {
       const finIndex = prev.findIndex((p) => p.selected === true);
@@ -207,60 +196,43 @@ function Flow(props) {
 
       return copiedItems;
     });
-  };
-
-  const onIncrease = () => {
-    // console.log(nodes);
-    // console.log(edges);
-    // console.log(curConnect);
-    const newNodes = cpmRerender(nodes, edges);
-    setNodes(newNodes);
-    // debugger;
-  };
-
-  const onSelectionChange = useCallback(
-    (params) => {
-      const ret = edges.find((e) => {
-        return e.selected && e;
-      });
-      setCurConnect((prev) => {
-        return { ...ret };
-      });
-    },
-
-    [edges]
-  );
+  });
 
   const onConnect = useCallback(
     (connection) => {
+      // console.log("onConnect");
+      // console.log("onConnect nodes : ", nodes);
+      // debugger;
+
       const source = nodes.find((n) => n.id === connection.source);
       const target = nodes.find((n) => n.id === connection.target);
+
       if (source.data.workDate > target.data.workDate) return;
+
       connection.data = {
         ...connection.data,
         onChange: onChange,
       };
 
       setEdges((eds) => {
-        // debugger;
         return addEdge(connection, eds);
       });
     },
 
-    [setEdges]
+    [nodes, setEdges]
   );
 
   return (
     <>
-      <div>
-        {/* <button onClick={onIncrease}>+1</button> */}
+      {/* <div>
+        <button onClick={onIncrease}>+1</button>
+      </div> */}
 
-        <Button variant="outlined" onClick={onIncrease}>
-          연결 재설정
-        </Button>
+      <div>
+        <button onClick={onNodeRerenderClick}>reRender</button>
       </div>
 
-      <div style={{ width: "100%", height: "100%" }}>
+      <div style={{ width: "100vw", height: "100vh" }}>
         <ReactFlow
           {...props}
           nodes={nodes}
@@ -269,7 +241,6 @@ function Flow(props) {
           defaultEdgeOptions={defaultEdgeOptions}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
-          onSelectionChange={onSelectionChange}
           onConnect={onConnect}
           nodeTypes={nodeTypes}
           fitView

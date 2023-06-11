@@ -1,9 +1,11 @@
 import React, { useState } from "react";
+
 import {
   EdgeProps,
   getBezierPath,
   EdgeLabelRenderer,
   BaseEdge,
+  useEdges,
 } from "reactflow";
 
 function CustomEdge2({
@@ -28,10 +30,14 @@ function CustomEdge2({
     targetPosition,
   });
 
+  const edges = useEdges();
+
   return (
     <>
       {/* <path id={id} className="react-flow__edge-path" d={edgePath} /> */}
+
       <BaseEdge path={edgePath} markerEnd={markerEnd} style={style} />
+
       <EdgeLabelRenderer>
         <div
           style={{
@@ -47,6 +53,7 @@ function CustomEdge2({
           className="nodrag nopan"
         >
           {/* <input value={text} onChange={onChange2} className="nodrag nopan" /> */}
+
           {/* <button
 className="edgebutton"
 onClick={(event) => onEdgeClick(event, id)}
@@ -54,11 +61,13 @@ onClick={(event) => onEdgeClick(event, id)}
 ×
 </button> */}
           {/* <input value={text} onChange={onChange} style={{ width: `20px` }} /> */}
+
           <input
             value={data.label || ""}
-            onChange={(e) => data.onChange(e)}
+            onChange={(e) => data.onChange(e, edges)}
             style={{ width: `20px` }}
           />
+
           {/* {data.label} */}
         </div>
       </EdgeLabelRenderer>
@@ -66,4 +75,4 @@ onClick={(event) => onEdgeClick(event, id)}
   );
 }
 
-export default CustomEdge2;
+export default React.memo(CustomEdge2);
