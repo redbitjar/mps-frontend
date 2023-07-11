@@ -10,7 +10,7 @@ export const initialNodes = [
       est: 1,
       lst: 1,
       blockName: "DF11C",
-      workDate: "",
+      workDate: "2023-07-01",
     },
     width: 70,
     height: 55,

@@ -23,6 +23,24 @@ import CustomEdge2 from "./CustomEdge2";
 import "./CustomNode.css";
 import CustomNode2 from "./CustomNode2";
 
+window.interfaces = {};
+
+function leftPad(value) {
+  if (value >= 10) {
+    return value;
+  }
+
+  return `0${value}`;
+}
+
+function toStringByFormatting(source, delimiter = "-") {
+  const year = source.getFullYear();
+  const month = leftPad(source.getMonth() + 1);
+  const day = leftPad(source.getDate());
+
+  return [year, month, day].join(delimiter);
+}
+
 const rfStyle = {
   backgroundColor: "#B8CEFF",
 };
@@ -97,24 +115,34 @@ function nodesRerender(sourceNode, parentIndex) {
 
     let maxEst = Number.MIN_SAFE_INTEGER;
     let maxLst = Number.MIN_SAFE_INTEGER;
+    // let maxLabel = Number.MIN_SAFE_INTEGER;
+    let maxDate = new Date(0);
+    const _data = data;
 
     const { prevEdges: tPrevEdges, prevNodes: tPrevNodes } = _targetNode;
     tPrevNodes.forEach((_tPrevNode, _tPrevIdx) => {
-      const { est: prevEst, lst: prevLst } = _tPrevNode.data;
+      const {
+        est: prevEst,
+        lst: prevLst,
+        workDate: preWorkDate,
+      } = _tPrevNode.data;
       const { label: prevLabel } = tPrevEdges[_tPrevIdx].data;
       const _tempEst = Number(prevEst) + Number(prevLabel || 0);
       const _tempLst = Number(prevLst) + Number(prevLabel || 0);
+      const _d = preWorkDate.split("-");
+      const _tempDate = new Date(_d[0], _d[1] - 1, _d[2]);
+      _tempDate.setDate(_tempDate.getDate() + Number(prevLabel || 0));
 
       maxEst = _tempEst > maxEst ? _tempEst : maxEst;
       maxLst = _tempLst > maxLst ? _tempLst : maxLst;
+      maxDate = _tempDate > maxDate ? _tempDate : maxDate;
     });
-
-    // debugger;
 
     _targetNode.data = {
       ..._targetNode.data,
       est: maxEst,
       lst: maxLst,
+      workDate: toStringByFormatting(maxDate),
     };
 
     nodesRerender(_targetNode);
@@ -155,6 +183,18 @@ function Flow(props) {
     // debugger;
   });
 
+  const onGetNodesAndEdgesClick = useCallback((e) => {
+    console.log("------ ", nodes);
+    console.log("------ ", edges);
+    return {
+      nodes: nodes,
+      edges: edges,
+    };
+  });
+  const onGetEdgesClick = useCallback((e) => {
+    console.log("------ ", edges);
+  });
+
   const onNodeRerenderClick = useCallback((e) => {
     // console.log("onNodeRerenderClick start");
     // console.log("nodes : ", nodes);
@@ -180,6 +220,9 @@ function Flow(props) {
     nodesRerender(rootNode, rootNodeIndex);
     setNodes(reRendreNodes);
   });
+
+  window.interfaces.onGetNodesAndEdgesClick = onGetNodesAndEdgesClick;
+  window.interfaces.onNodeRerenderClick = onNodeRerenderClick;
 
   const onChange = useCallback((e, edges) => {
     const tValue = e.target.value;
@@ -207,7 +250,7 @@ function Flow(props) {
       const source = nodes.find((n) => n.id === connection.source);
       const target = nodes.find((n) => n.id === connection.target);
 
-      if (source.data.workDate > target.data.workDate) return;
+      // if (source.data.workDate > target.data.workDate) return;
 
       connection.data = {
         ...connection.data,
@@ -230,6 +273,8 @@ function Flow(props) {
 
       <div>
         <button onClick={onNodeRerenderClick}>reRender</button>
+        <button onClick={onGetNodesAndEdgesClick}>getNodes</button>
+        <button onClick={onGetEdgesClick}>getEdges</button>
       </div>
 
       <div style={{ width: "100vw", height: "100vh" }}>
