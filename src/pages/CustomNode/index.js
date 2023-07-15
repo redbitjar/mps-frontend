@@ -154,6 +154,8 @@ function nodesRerender2(sourceNode, parentIndex) {
     // let maxLabel = Number.MIN_SAFE_INTEGER;
     let maxDate = new Date(0);
 
+    debugger;
+
     const { prevEdges: tPrevEdges } = _targetNode;
 
     let _prevNodeIds = tPrevEdges.map((m) => m.source);
@@ -351,8 +353,6 @@ function Flow(props) {
     // copiedNodes = _.cloneDeep(initialNodes);
     // setNodes(copiedNodes);
 
-    debugger;
-
     cnt++;
     setNodes([...initialNodes]);
   }, []);
@@ -405,17 +405,30 @@ function Flow(props) {
     debugger;
     if (cnt === 1) {
       cnt++;
+      initialEdges2
+        .filter((f) => f.data && f.data.criticalPath === true)
+        .forEach((e) => (e.animated = true));
       initialEdges2.forEach((e) => (e.data.onChange = onChange));
-      debugger;
+      // debugger;
       setNodes([...initialNodes2]);
       setEdges([...initialEdges2]);
     } else if (cnt === 2) {
       cnt++;
-      initialEdges2.forEach((e) => (e.data.onChange = onChange));
+      initialEdges3
+        .filter((f) => f.data && f.data.criticalPath === true)
+        .forEach((e) => (e.animated = true));
+      initialEdges3.forEach((e) => (e.data.onChange = onChange));
       setNodes([...initialNodes3]);
       setEdges([...initialEdges3]);
     } else {
       cnt = 1;
+      initialEdges
+        .filter((f) => f.data && f.data.criticalPath === true)
+        .forEach((e) => (e.animated = true));
+      initialEdges.forEach((e) => (e.data.onChange = onChange));
+      initialEdges.forEach((e) => {
+        if (e.data) e.data.onChange = onChange;
+      });
       setNodes([...initialNodes]);
       setEdges([...initialEdges]);
     }
@@ -425,8 +438,14 @@ function Flow(props) {
   const onNodeRerenderClick = useCallback((e) => {
     reRenderNodes = _.cloneDeep(nodes);
     reRenderEdges = _.cloneDeep(edges);
-    reRenderNodes.forEach((f) => (f.data.criticalPath = false));
-    reRenderEdges.forEach((f) => (f.data.criticalPath = false));
+    reRenderNodes.forEach((f) => {
+      if (!f.data) f.data = {};
+      f.data.criticalPath = false;
+    });
+    reRenderEdges.forEach((f) => {
+      if (!f.data) f.data = {};
+      f.data.criticalPath = false;
+    });
     nodesConnectEdges2(reRenderEdges);
     const rootNodeIndex = reRenderNodes.findIndex((n) => n.type === "cpmMain");
     const rootNode = reRenderNodes[rootNodeIndex];
@@ -457,8 +476,17 @@ function Flow(props) {
     //   }
     // }
 
-    reRenderEdges.filter((f) => f.data.criticalPath === true).forEach((e) => e);
+    reRenderEdges
+      .filter((f) => f.data.criticalPath === true)
+      .forEach((e) => (e.animated = true));
 
+    reRenderEdges.forEach((e) => {
+      if (e.data.criticalPath) {
+        e.animated = true;
+      } else {
+        e.animated = false;
+      }
+    });
     //   // debugger;
     setNodes(reRenderNodes);
     setEdges(reRenderEdges);
