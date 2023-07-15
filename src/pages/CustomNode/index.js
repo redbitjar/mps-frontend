@@ -18,6 +18,14 @@ import ReactFlow, {
 import "reactflow/dist/style.css";
 
 import { initialNodes, initialEdges } from "./networkData";
+import {
+  initialNodes as initialNodes2,
+  initialEdges as initialEdges2,
+} from "./networkData2";
+import {
+  initialNodes as initialNodes3,
+  initialEdges as initialEdges3,
+} from "./networkData3";
 import CustomNode from "./CustomNode.js";
 import CustomEdge2 from "./CustomEdge2";
 import "./CustomNode.css";
@@ -334,7 +342,7 @@ function reverseNodesRerender(sourceNode, edges) {
 //     reverseNodesRerender(node, edges);
 //   }
 // }
-
+let cnt = 0;
 function Flow(props) {
   const [nodes, setNodes] = useNodesState([]);
   const [edges, setEdges] = useEdgesState([]);
@@ -343,6 +351,9 @@ function Flow(props) {
     // copiedNodes = _.cloneDeep(initialNodes);
     // setNodes(copiedNodes);
 
+    debugger;
+
+    cnt++;
     setNodes([...initialNodes]);
   }, []);
 
@@ -380,17 +391,34 @@ function Flow(props) {
         .filter((f) => f.data.criticalPath === true)
         .map((m) => ({ [m.source]: m.target }))
     );
-    debugger;
     return {
       nodes: nodes,
       edges: edges,
     };
   });
-  const onGetEdgesClick = useCallback((e) => {
+  const onEdgesClear = useCallback((e) => {
     console.log("------ ", edges);
+    setEdges([]);
   });
 
-  const onGetCriticalPathClick = useCallback((e) => {
+  const onDataNodeBind = useCallback((e) => {
+    debugger;
+    if (cnt === 1) {
+      cnt++;
+      initialEdges2.forEach((e) => (e.data.onChange = onChange));
+      debugger;
+      setNodes([...initialNodes2]);
+      setEdges([...initialEdges2]);
+    } else if (cnt === 2) {
+      cnt++;
+      initialEdges2.forEach((e) => (e.data.onChange = onChange));
+      setNodes([...initialNodes3]);
+      setEdges([...initialEdges3]);
+    } else {
+      cnt = 1;
+      setNodes([...initialNodes]);
+      setEdges([...initialEdges]);
+    }
     // console.log("------ ", edges);
   });
 
@@ -400,7 +428,6 @@ function Flow(props) {
     reRenderNodes.forEach((f) => (f.data.criticalPath = false));
     reRenderEdges.forEach((f) => (f.data.criticalPath = false));
     nodesConnectEdges2(reRenderEdges);
-    debugger;
     const rootNodeIndex = reRenderNodes.findIndex((n) => n.type === "cpmMain");
     const rootNode = reRenderNodes[rootNodeIndex];
     nodesRerender2(rootNode, rootNodeIndex);
@@ -416,19 +443,19 @@ function Flow(props) {
       console.log("nodesRerender edges : " + reRenderEdges);
     }
 
-    for (let _edge of reRenderEdges) {
-      if (_edge.data.criticalPath === true) {
-        _edge.style = {
-          strokeWidth: 1,
-          stroke: "#FF0072",
-        };
-      } else {
-        _edge.style = {
-          strokeWidth: 1,
-          stroke: "#b1b1b7",
-        };
-      }
-    }
+    // for (let _edge of reRenderEdges) {
+    //   if (_edge.data.criticalPath === true) {
+    //     _edge.style = {
+    //       strokeWidth: 1,
+    //       stroke: "#FF0072",
+    //     };
+    //   } else {
+    //     _edge.style = {
+    //       strokeWidth: 1,
+    //       stroke: "#b1b1b7",
+    //     };
+    //   }
+    // }
 
     reRenderEdges.filter((f) => f.data.criticalPath === true).forEach((e) => e);
 
@@ -478,11 +505,12 @@ function Flow(props) {
 
   const onChange = useCallback((e, edges) => {
     const tValue = e.target.value;
-
+    let selectedEdge = edges.find((f) => f.id === e.target.dataset.id);
+    selectedEdge.selected = true;
     console.log("onChange edges: ", edges);
 
     setEdges((prev) => {
-      const finIndex = prev.findIndex((p) => p.selected === true);
+      const finIndex = prev.findIndex((p) => p.id === selectedEdge.id);
       let copiedItems = [...prev];
       copiedItems[finIndex].data = {
         ...copiedItems[finIndex].data,
@@ -491,7 +519,6 @@ function Flow(props) {
 
       return copiedItems;
     });
-    debugger;
     window.interfaces.onNodeRerenderClick();
   });
 
@@ -528,8 +555,8 @@ function Flow(props) {
       <div>
         <button onClick={onNodeRerenderClick}>reRender</button>
         <button onClick={onGetNodesAndEdgesClick}>getNodes</button>
-        <button onClick={onGetEdgesClick}>getEdges</button>
-        <button onClick={onGetCriticalPathClick}>getCriticalPath</button>
+        <button onClick={onEdgesClear}>edgesClear</button>
+        <button onClick={onDataNodeBind}>onDataChange</button>
       </div>
 
       <div style={{ width: "100vw", height: "100vh" }}>
@@ -543,6 +570,7 @@ function Flow(props) {
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
           nodeTypes={nodeTypes}
+          minZoom={0.2}
           fitView
           style={rfStyle}
         />
