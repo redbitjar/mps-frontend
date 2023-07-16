@@ -14,7 +14,8 @@ function CustomNode({ data, isConnectable }) {
         <div className="div1">{data.est}</div>
         <div className="div2">{data.lst}</div>
         <div className="div3">{data.blockName}</div>
-        <div className="div4">{data.workDate}</div>
+        <div className="div4">{data.startDate}</div>
+        <div className="div5">{data.endDate}</div>
       </div>
       <Handle
         type="source"

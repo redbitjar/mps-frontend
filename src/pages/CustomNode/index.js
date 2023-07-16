@@ -26,10 +26,16 @@ import {
   initialNodes as initialNodes3,
   initialEdges as initialEdges3,
 } from "./networkData3";
+import {
+  initialNodes as initialNodes4,
+  initialEdges as initialEdges4,
+} from "./networkData4";
+
 import CustomNode from "./CustomNode.js";
 import CustomEdge2 from "./CustomEdge2";
 import "./CustomNode.css";
 import CustomNode2 from "./CustomNode2";
+import CustomNode3 from "./CustomNode3";
 
 window.interfaces = {};
 
@@ -53,7 +59,11 @@ const rfStyle = {
   backgroundColor: "#B8CEFF",
 };
 
-const nodeTypes = { cpm: CustomNode, cpmMain: CustomNode2 };
+const nodeTypes = {
+  cpm: CustomNode,
+  cpmMain: CustomNode2,
+  cpmEnd: CustomNode3,
+};
 const edgeTypes = {
   custom: CustomEdge2,
 };
@@ -72,6 +82,7 @@ const defaultEdgeOptions = {
 let reRenderNodes = [];
 let reRenderEdges = [];
 let criticalPath = [];
+let originalData = {};
 // copiedNodes = _.cloneDeep(initialNodes);
 
 function nodesConnectEdges2(edges) {
@@ -136,7 +147,7 @@ function nodesConnectEdges(edges) {
 
 function nodesRerender2(sourceNode, parentIndex) {
   let { id, data, prevEdges, prevNodes, targetEdges } = sourceNode;
-  const { est: sourceEst, lst: sourceLst, workDate } = data;
+  const { est: sourceEst, lst: sourceLst, startDate } = data;
 
   let _targetNodeIds = targetEdges.map((m) => m.target);
   let _targetNodes = [];
@@ -154,8 +165,6 @@ function nodesRerender2(sourceNode, parentIndex) {
     // let maxLabel = Number.MIN_SAFE_INTEGER;
     let maxDate = new Date(0);
 
-    debugger;
-
     const { prevEdges: tPrevEdges } = _targetNode;
 
     let _prevNodeIds = tPrevEdges.map((m) => m.source);
@@ -168,12 +177,12 @@ function nodesRerender2(sourceNode, parentIndex) {
       const {
         est: prevEst,
         lst: prevLst,
-        workDate: preWorkDate,
+        startDate: prestartDate,
       } = _tPrevNode.data;
       const { label: prevLabel } = tPrevEdges[_tPrevIdx].data;
       const _tempEst = Number(prevEst) + Number(prevLabel || 0);
       const _tempLst = Number(prevLst) + Number(prevLabel || 0);
-      const _d = preWorkDate.split("-");
+      const _d = prestartDate.split("-");
       const _tempDate = new Date(_d[0], _d[1] - 1, _d[2]);
       _tempDate.setDate(_tempDate.getDate() + Number(prevLabel || 0));
 
@@ -186,7 +195,8 @@ function nodesRerender2(sourceNode, parentIndex) {
       ..._targetNode.data,
       est: maxEst,
       lst: maxLst,
-      workDate: toStringByFormatting(maxDate),
+      startDate: toStringByFormatting(maxDate),
+      endDate: toStringByFormatting(maxDate),
     };
 
     nodesRerender2(_targetNode);
@@ -195,7 +205,7 @@ function nodesRerender2(sourceNode, parentIndex) {
 
 // function nodesRerender(sourceNode, parentIndex) {
 //   let { id, data, prevEdges, prevNodes, targetEdges, targetNodes } = sourceNode;
-//   const { est: sourceEst, lst: sourceLst, workDate } = data;
+//   const { est: sourceEst, lst: sourceLst, startDate } = data;
 
 //   targetNodes.forEach((_targetNode, _idx) => {
 //     // const label = targetEdges[_idx].data.label;
@@ -213,12 +223,12 @@ function nodesRerender2(sourceNode, parentIndex) {
 //       const {
 //         est: prevEst,
 //         lst: prevLst,
-//         workDate: preWorkDate,
+//         startDate: prestartDate,
 //       } = _tPrevNode.data;
 //       const { label: prevLabel } = tPrevEdges[_tPrevIdx].data;
 //       const _tempEst = Number(prevEst) + Number(prevLabel || 0);
 //       const _tempLst = Number(prevLst) + Number(prevLabel || 0);
-//       const _d = preWorkDate.split("-");
+//       const _d = prestartDate.split("-");
 //       const _tempDate = new Date(_d[0], _d[1] - 1, _d[2]);
 //       _tempDate.setDate(_tempDate.getDate() + Number(prevLabel || 0));
 
@@ -231,7 +241,7 @@ function nodesRerender2(sourceNode, parentIndex) {
 //       ..._targetNode.data,
 //       est: maxEst,
 //       lst: maxLst,
-//       workDate: toStringByFormatting(maxDate),
+//       startDate: toStringByFormatting(maxDate),
 //     };
 
 //     nodesRerender(_targetNode);
@@ -286,16 +296,22 @@ function reverseNodesRerender(sourceNode, edges) {
 
       if (criticalPathNode === false) {
         let minLst = Number.MAX_SAFE_INTEGER;
+        let minDate = new Date(8640000000000000);
         for (let _targetEdge of tTargetEdges) {
           let _tNode = reRenderNodes.find(
             (f) => f.data.blockName === _targetEdge.target
           );
           const { label: targetLabel } = _targetEdge.data;
-          const { lst: targetLst } = _tNode.data;
+          const { lst: targetLst, endDate: targetEndDate } = _tNode.data;
           const _tempLst = Number(targetLst) - Number(targetLabel || 0);
+          const _d = targetEndDate.split("-");
+          const _tempDate = new Date(_d[0], _d[1] - 1, _d[2]);
+          _tempDate.setDate(_tempDate.getDate() - Number(targetLabel || 0));
           minLst = minLst > _tempLst ? _tempLst : minLst;
+          minDate = minDate > _tempDate ? _tempDate : minDate;
         }
         _node.data.lst = minLst;
+        _node.data.endDate = toStringByFormatting(minDate);
       }
     }
   }
@@ -394,6 +410,7 @@ function Flow(props) {
     return {
       nodes: nodes,
       edges: edges,
+      originalData: originalData,
     };
   });
   const onEdgesClear = useCallback((e) => {
@@ -401,30 +418,51 @@ function Flow(props) {
     setEdges([]);
   });
 
+  const onIdUpdate = useCallback((id) => {
+    originalData.id = id;
+  });
+  const onIFDataNodeBind = useCallback((nodes, edges, rawData) => {
+    let initialNodes = nodes || [];
+    let initialEdges = edges || [];
+    originalData = rawData || {};
+    debugger;
+    initialEdges
+      .filter((f) => f.data && f.data.criticalPath === true)
+      .forEach((e) => (e.animated = true));
+    // initialEdges.forEach((e) => (e.data.onChange = onChange));
+    initialEdges.forEach((e) => {
+      if (e.data) e.data.onChange = onChange;
+    });
+    setNodes([...initialNodes]);
+    setEdges([...initialEdges]);
+  });
+
   const onDataNodeBind = useCallback((e) => {
     debugger;
     if (cnt === 1) {
       cnt++;
-      initialEdges2
-        .filter((f) => f.data && f.data.criticalPath === true)
-        .forEach((e) => (e.animated = true));
+      // initialEdges2
+      //   .filter((f) => f.data && f.data.criticalPath === true)
+      //   .forEach((e) => (e.animated = true));
       initialEdges2.forEach((e) => (e.data.onChange = onChange));
       // debugger;
       setNodes([...initialNodes2]);
       setEdges([...initialEdges2]);
     } else if (cnt === 2) {
       cnt++;
-      initialEdges3
-        .filter((f) => f.data && f.data.criticalPath === true)
-        .forEach((e) => (e.animated = true));
+      // initialEdges3
+      //   .filter((f) => f.data && f.data.criticalPath === true)
+      //   .forEach((e) => (e.animated = true));
       initialEdges3.forEach((e) => (e.data.onChange = onChange));
       setNodes([...initialNodes3]);
       setEdges([...initialEdges3]);
     } else {
       cnt = 1;
-      initialEdges
-        .filter((f) => f.data && f.data.criticalPath === true)
-        .forEach((e) => (e.animated = true));
+      let _initialEdges = initialEdges;
+      debugger;
+      // initialEdges
+      //   .filter((f) => f.data && f.data.criticalPath === true)
+      //   .forEach((e) => (e.animated = true));
       initialEdges.forEach((e) => (e.data.onChange = onChange));
       initialEdges.forEach((e) => {
         if (e.data) e.data.onChange = onChange;
@@ -476,17 +514,17 @@ function Flow(props) {
     //   }
     // }
 
-    reRenderEdges
-      .filter((f) => f.data.criticalPath === true)
-      .forEach((e) => (e.animated = true));
+    // reRenderEdges
+    //   .filter((f) => f.data.criticalPath === true)
+    //   .forEach((e) => (e.animated = true));
 
-    reRenderEdges.forEach((e) => {
-      if (e.data.criticalPath) {
-        e.animated = true;
-      } else {
-        e.animated = false;
-      }
-    });
+    // reRenderEdges.forEach((e) => {
+    //   if (e.data.criticalPath) {
+    //     e.animated = true;
+    //   } else {
+    //     e.animated = false;
+    //   }
+    // });
     //   // debugger;
     setNodes(reRenderNodes);
     setEdges(reRenderEdges);
@@ -530,6 +568,8 @@ function Flow(props) {
 
   window.interfaces.onGetNodesAndEdgesClick = onGetNodesAndEdgesClick;
   window.interfaces.onNodeRerenderClick = onNodeRerenderClick;
+  window.interfaces.onDataNodeBind = onIFDataNodeBind;
+  window.interfaces.onIdUpdate = onIdUpdate;
 
   const onChange = useCallback((e, edges) => {
     const tValue = e.target.value;
@@ -559,7 +599,7 @@ function Flow(props) {
       const source = nodes.find((n) => n.id === connection.source);
       const target = nodes.find((n) => n.id === connection.target);
 
-      // if (source.data.workDate > target.data.workDate) return;
+      // if (source.data.startDate > target.data.startDate) return;
 
       connection.data = {
         ...connection.data,

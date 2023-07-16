@@ -1,6 +1,6 @@
 export const initialNodes = [
   {
-    id: "DF11C",
+    id: "K/L",
     type: "cpmMain",
     position: {
       x: -396,
@@ -9,8 +9,32 @@ export const initialNodes = [
     data: {
       est: 1,
       lst: 1,
-      blockName: "DF11C",
-      workDate: "2023-07-01",
+      blockName: "K/L",
+      startDate: "2023-07-01",
+      endDate: "2023-07-01",
+    },
+    width: 70,
+    height: 55,
+    selected: false,
+    positionAbsolute: {
+      x: -396,
+      y: -280.5,
+    },
+    dragging: false,
+  },
+  {
+    id: "L/C",
+    type: "cpmEnd",
+    position: {
+      x: -396,
+      y: -280.5,
+    },
+    data: {
+      est: 1,
+      lst: 1,
+      blockName: "L/C",
+      startDate: "2023-07-01",
+      endDate: "2023-07-01",
     },
     width: 70,
     height: 55,
@@ -32,7 +56,8 @@ export const initialNodes = [
       est: 0,
       lst: 0,
       blockName: "DF21P",
-      workDate: "",
+      startDate: "",
+      endDate: "",
     },
     width: 72,
     height: 57,
@@ -55,7 +80,8 @@ export const initialNodes = [
       est: 0,
       lst: 0,
       blockName: "DF31C",
-      workDate: "",
+      startDate: "",
+      endDate: "",
     },
     width: 72,
     height: 57,
@@ -78,7 +104,8 @@ export const initialNodes = [
       est: 0,
       lst: 0,
       blockName: "DF39C",
-      workDate: "",
+      startDate: "",
+      endDate: "",
     },
     width: 72,
     height: 57,
@@ -100,7 +127,8 @@ export const initialNodes = [
       est: 0,
       lst: 0,
       blockName: "DF41C",
-      workDate: "",
+      startDate: "",
+      endDate: "",
     },
     width: 72,
     height: 57,
@@ -122,7 +150,8 @@ export const initialNodes = [
       est: 0,
       lst: 0,
       blockName: "DF51P",
-      workDate: "",
+      startDate: "",
+      endDate: "",
     },
     width: 72,
     height: 57,
@@ -146,7 +175,8 @@ export const initialNodes = [
       est: 0,
       lst: 0,
       blockName: "DF61P",
-      workDate: "",
+      startDate: "",
+      endDate: "",
     },
 
     width: 72,
@@ -171,7 +201,8 @@ export const initialNodes = [
   //     est: 0,
   //     lst: 0,
   //     blockName: "DF62P",
-  //     workDate: "",
+  //     startDate: "",
+  // endDate:""
   //   },
   //   width: 72,
   //   height: 57,
@@ -194,7 +225,8 @@ export const initialNodes = [
   //     est: 0,
   //     lst: 0,
   //     blockName: "DF71C",
-  //     workDate: "",
+  //     startDate: "",
+  // endDate:""
   //   },
 
   //   width: 72,
@@ -219,7 +251,8 @@ export const initialNodes = [
   //     est: 0,
   //     lst: 0,
   //     blockName: "DF72P",
-  //     workDate: "",
+  //     startDate: "",
+  // endDate:""
   //   },
   //   width: 72,
   //   height: 57,
@@ -243,7 +276,8 @@ export const initialNodes = [
   //     est: 0,
   //     lst: 0,
   //     blockName: "DF73P",
-  //     workDate: "",
+  //     startDate: "",
+  // endDate:""
   //   },
   //   width: 72,
   //   height: 57,
@@ -257,10 +291,10 @@ export const initialNodes = [
 ];
 
 export const initialEdges = [
-  {
-    id: "e1-3",
-    source: "node-1",
-    target: "node-3",
-    label: "8",
-  },
+  // {
+  //   id: "e1-3",
+  //   source: "node-1",
+  //   target: "node-3",
+  //   label: "8",
+  // },
 ];

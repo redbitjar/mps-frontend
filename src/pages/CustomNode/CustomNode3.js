@@ -4,9 +4,9 @@ import { Handle, Position } from "reactflow";
 
 const handleStyle = { left: 10 };
 
-function CustomNode2({ data, isConnectable }) {
+function CustomNod3({ data, isConnectable }) {
   return (
-    <div className="text-updater-node main">
+    <div className="text-updater-node end">
       <Handle
         type="target"
         position={Position.Top}
@@ -29,4 +29,4 @@ function CustomNode2({ data, isConnectable }) {
   );
 }
 
-export default CustomNode2;
+export default CustomNod3;
