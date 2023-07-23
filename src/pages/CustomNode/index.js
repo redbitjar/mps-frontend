@@ -3,20 +3,29 @@ import { useCallback, useEffect, useState } from "react";
 import _ from "lodash";
 
 import ReactFlow, {
+  Background,
+  BackgroundVariant,
+  Controls,
   MarkerType,
+  Panel,
   ReactFlowProvider,
   addEdge,
   applyEdgeChanges,
   applyNodeChanges,
+  getRectOfNodes,
+  getTransformForBounds,
   updateEdge,
   useEdges,
   useEdgesState,
   useNodesState,
   useOnSelectionChange,
+  useReactFlow,
 } from "reactflow";
+// import dagre from "dagre";
+import dagre from "dagre";
 
 import "reactflow/dist/style.css";
-
+import "./CustomNode.css";
 import { initialNodes, initialEdges } from "./networkData";
 import {
   initialNodes as initialNodes2,
@@ -33,11 +42,60 @@ import {
 
 import CustomNode from "./CustomNode.js";
 import CustomEdge2 from "./CustomEdge2";
-import "./CustomNode.css";
+
 import CustomNode2 from "./CustomNode2";
 import CustomNode3 from "./CustomNode3";
+import CustomNode4 from "./CustomNode4";
+import { toPng } from "html-to-image";
 
 window.interfaces = {};
+
+const dagreGraph = new dagre.graphlib.Graph();
+dagreGraph.setDefaultEdgeLabel(() => ({}));
+
+const nodeWidth = 60;
+const nodeHeight = 60;
+
+const getLayoutedElements = (nodes, edges, direction = "TB") => {
+  const isHorizontal = direction === "LR";
+  dagreGraph.setGraph({ rankdir: direction });
+
+  nodes.forEach((node) => {
+    dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
+  });
+
+  edges.forEach((edge) => {
+    dagreGraph.setEdge(edge.source, edge.target);
+  });
+
+  dagre.layout(dagreGraph);
+
+  nodes.forEach((node) => {
+    const nodeWithPosition = dagreGraph.node(node.id);
+    node.targetPosition = isHorizontal ? "left" : "top";
+    node.sourcePosition = isHorizontal ? "right" : "bottom";
+
+    // We are shifting the dagre node position (anchor=center center) to the top left
+    // so it matches the React Flow node anchor point (top left).
+    node.position = {
+      x: nodeWithPosition.x - nodeWidth / 2,
+      y: nodeWithPosition.y - nodeHeight / 2,
+    };
+
+    return node;
+  });
+
+  return { nodes, edges };
+};
+
+const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
+  initialNodes,
+  initialEdges
+);
+const onLoad = (reactFlowInstance) => {
+  debugger;
+  setTimeout(() => reactFlowInstance.fitView(), 0);
+};
 
 function leftPad(value) {
   if (value >= 10) {
@@ -63,6 +121,7 @@ const nodeTypes = {
   cpm: CustomNode,
   cpmMain: CustomNode2,
   cpmEnd: CustomNode3,
+  cpmEvent: CustomNode4,
 };
 const edgeTypes = {
   custom: CustomEdge2,
@@ -102,44 +161,6 @@ function nodesConnectEdges2(edges) {
       } else if (_edges.target === _node.id) {
         _node.prevEdges.push(_edges);
         // _node.prevNodes.push(reRenderNodes.find((f) => f.id === _edges.source));
-      }
-    }
-  }
-}
-
-function nodesConnectEdges(edges) {
-  // console.log("nodesConnectEdges---------start");
-  // // console.log("reRenderNodes : ", nodes);
-  // console.log("reRenderNodes : ", reRenderNodes);
-  // console.log("edges : ", edges);
-  // console.log("nodesConnectEdges---------end");
-  // debugger;
-
-  // 1. 엣지 검색
-  // let connectedEdges = edges.filter(f => f.soruce === parentNode.id)
-  // 2. reRenderNodes부터 타겟 노드 검색
-  // 3. reRenderNodes에 parent Node 검색
-  // 3.1 parent Node 정보 수정
-  // 3.2 target 노드 배열 추가
-  // 3.3 edge label 정보 추가
-  // reRenderNodes
-
-  for (let _node of reRenderNodes) {
-    _node.targetEdges = [];
-    _node.targetNodes = [];
-    _node.prevEdges = [];
-    _node.prevNodes = [];
-
-    for (let _edges of edges) {
-      if (_edges.source === _node.id) {
-        // _node.data.weight = _edges.data.label;
-        _node.targetEdges.push(_edges);
-        _node.targetNodes.push(
-          reRenderNodes.find((f) => f.id === _edges.target)
-        );
-      } else if (_edges.target === _node.id) {
-        _node.prevEdges.push(_edges);
-        _node.prevNodes.push(reRenderNodes.find((f) => f.id === _edges.source));
       }
     }
   }
@@ -203,57 +224,6 @@ function nodesRerender2(sourceNode, parentIndex) {
   });
 }
 
-// function nodesRerender(sourceNode, parentIndex) {
-//   let { id, data, prevEdges, prevNodes, targetEdges, targetNodes } = sourceNode;
-//   const { est: sourceEst, lst: sourceLst, startDate } = data;
-
-//   targetNodes.forEach((_targetNode, _idx) => {
-//     // const label = targetEdges[_idx].data.label;
-//     // let maxEst = Number(label || 0) + sourceEst;
-//     // let maxlst = Number(label || 0) + sourceLst
-
-//     let maxEst = Number.MIN_SAFE_INTEGER;
-//     let maxLst = Number.MIN_SAFE_INTEGER;
-//     // let maxLabel = Number.MIN_SAFE_INTEGER;
-//     let maxDate = new Date(0);
-//     const _data = data;
-
-//     const { prevEdges: tPrevEdges, prevNodes: tPrevNodes } = _targetNode;
-//     tPrevNodes.forEach((_tPrevNode, _tPrevIdx) => {
-//       const {
-//         est: prevEst,
-//         lst: prevLst,
-//         startDate: prestartDate,
-//       } = _tPrevNode.data;
-//       const { label: prevLabel } = tPrevEdges[_tPrevIdx].data;
-//       const _tempEst = Number(prevEst) + Number(prevLabel || 0);
-//       const _tempLst = Number(prevLst) + Number(prevLabel || 0);
-//       const _d = prestartDate.split("-");
-//       const _tempDate = new Date(_d[0], _d[1] - 1, _d[2]);
-//       _tempDate.setDate(_tempDate.getDate() + Number(prevLabel || 0));
-
-//       maxEst = _tempEst > maxEst ? _tempEst : maxEst;
-//       maxLst = _tempLst > maxLst ? _tempLst : maxLst;
-//       maxDate = _tempDate > maxDate ? _tempDate : maxDate;
-//     });
-
-//     _targetNode.data = {
-//       ..._targetNode.data,
-//       est: maxEst,
-//       lst: maxLst,
-//       startDate: toStringByFormatting(maxDate),
-//     };
-
-//     nodesRerender(_targetNode);
-//   });
-// }
-
-function reverseNodesRerender2(sourceNode, edges) {
-  let _reRenderNodes = reRenderNodes;
-  let _reRenderEdges = reRenderEdges;
-  let _sourceNode = sourceNode;
-  debugger;
-}
 function reverseNodesRerender(sourceNode, edges) {
   let needVisit = []; // 탐색해야할 노드들
   needVisit.push(sourceNode); // 노드 탐색 시작
@@ -317,61 +287,92 @@ function reverseNodesRerender(sourceNode, edges) {
   }
 }
 
-// function reverseNodesRerender(sourceNode, edges) {
-//   let prevNodes = sourceNode.prevNodes;
-//   let criticalNode;
-//   for (let node of prevNodes) {
-//     // debugger;
-//     let criticalEdge = edges.find(
-//       (e) =>
-//         e.source === node.data.blockName &&
-//         e.target === sourceNode.data.blockName
-//     );
-//     if (
-//       sourceNode.data.est === node.data.est + Number(criticalEdge.data.label) &&
-//       sourceNode.data.criticalPath
-//     ) {
-//       if (node.type !== "cpmMain") {
-//         node.data.criticalPath = true;
-//       }
-
-//       criticalEdge.style = {
-//         strokeWidth: 1,
-//         stroke: "#FF0072",
-//       };
-//     } else {
-//       if (node.type !== "cpmMain") {
-//         if (node.id === "DF39C") debugger;
-//         const isRefCriticalPath = node.targetNodes.findIndex(
-//           (f) => f.data.criticalPath === true
-//         );
-//         if (isRefCriticalPath) return;
-//         node.data.criticalPath = false;
-//         node.data.lst = sourceNode.data.est - Number(criticalEdge.data.label);
-//         // if (node.targetEdges.length === 1) {
-//         //   node.data.lst = sourceNode.data.lst - Number(criticalEdge.data.label);
-//         // }
-//       }
-//       criticalEdge.style = {
-//         strokeWidth: 1,
-//         stroke: "#b1b1b7",
-//       };
-//     }
-//     reverseNodesRerender(node, edges);
-//   }
-// }
+const defaultViewport = { x: 0, y: 0, zoom: 1 };
+const snapGrid = [25, 25];
 let cnt = 0;
+const imageWidth = 1024;
+const imageHeight = 768;
+
+function downloadImage(dataUrl) {
+  const a = document.createElement("a");
+
+  a.setAttribute("download", "reactflow.png");
+  a.setAttribute("href", dataUrl);
+  a.click();
+}
+
+const getNodeId = () => `randomnode_${+new Date()}`;
+
 function Flow(props) {
   const [nodes, setNodes] = useNodesState([]);
   const [edges, setEdges] = useEdgesState([]);
+  const { getNodes } = useReactFlow();
+
+  const [reactflowInstance, setReactflowInstance] = useState(null);
+
+  const handleResize = useCallback(() => {
+    reactflowInstance && reactflowInstance.fitView();
+  }, [reactflowInstance]);
+
+  const onInit = useCallback(
+    (flowInstance) => {
+      // setNodes([...props.nodes]);
+      // setEdges([...props.edges]);
+
+      if (!reactflowInstance) {
+        setReactflowInstance(flowInstance);
+        // setTimeout(() => fitViewTestClick(), 0);
+      }
+
+      cnt++;
+      setNodes([...initialNodes]);
+    },
+    [props.nodes, props.edges, setNodes, setEdges, reactflowInstance]
+  );
+
+  const onLayout = useCallback(
+    (direction) => {
+      const { nodes: layoutedNodes, edges: layoutedEdges } =
+        getLayoutedElements(nodes, edges, direction);
+
+      setNodes([...layoutedNodes]);
+      setEdges([...layoutedEdges]);
+    },
+    [nodes, edges]
+  );
+
+  const onDownImgClick = useCallback(() => {
+    const nodesBounds = getRectOfNodes(getNodes());
+    const transform = getTransformForBounds(
+      nodesBounds,
+      imageWidth,
+      imageHeight,
+      0.5,
+      2
+    );
+
+    toPng(document.querySelector(".react-flow__viewport"), {
+      backgroundColor: "#1a365d",
+      width: imageWidth,
+      height: imageHeight,
+      style: {
+        width: imageWidth,
+        height: imageHeight,
+        transform: `translate(${transform[0]}px, ${transform[1]}px) scale(${transform[2]})`,
+      },
+    }).then(downloadImage);
+  });
 
   useEffect(() => {
-    // copiedNodes = _.cloneDeep(initialNodes);
-    // setNodes(copiedNodes);
+    window.addEventListener("resize", handleResize);
+    reactflowInstance && setTimeout(() => reactflowInstance.fitView(), 0);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [handleResize, reactflowInstance]);
 
-    cnt++;
-    setNodes([...initialNodes]);
-  }, []);
+  // useEffect(() => {
+  //   cnt++;
+  //   setNodes([...initialNodes]);
+  // }, []);
 
   const onNodesChange = useCallback(
     (changes) => setNodes((nds) => applyNodeChanges(changes, nds)),
@@ -385,16 +386,6 @@ function Flow(props) {
 
     [setEdges]
   );
-
-  const onIncrease = useCallback((e) => {
-    // console.log("onIncrease start");
-    // console.log("nodes : ", nodes);
-    // console.log("edges : ", edges);
-    // console.log("onIncrease end");
-    console.log("criticalPath : ", criticalPath);
-
-    // debugger;
-  });
 
   const onGetNodesAndEdgesClick = useCallback((e) => {
     console.log("------ ", nodes);
@@ -425,7 +416,6 @@ function Flow(props) {
     let initialNodes = nodes || [];
     let initialEdges = edges || [];
     originalData = rawData || {};
-    debugger;
     initialEdges
       .filter((f) => f.data && f.data.criticalPath === true)
       .forEach((e) => (e.animated = true));
@@ -435,10 +425,13 @@ function Flow(props) {
     });
     setNodes([...initialNodes]);
     setEdges([...initialEdges]);
+
+    setTimeout(() => fitViewTestClick(), 0);
   });
 
   const onDataNodeBind = useCallback((e) => {
-    debugger;
+    let _initNode = _.cloneDeep[nodes];
+
     if (cnt === 1) {
       cnt++;
       // initialEdges2
@@ -459,7 +452,6 @@ function Flow(props) {
     } else {
       cnt = 1;
       let _initialEdges = initialEdges;
-      debugger;
       // initialEdges
       //   .filter((f) => f.data && f.data.criticalPath === true)
       //   .forEach((e) => (e.animated = true));
@@ -470,6 +462,7 @@ function Flow(props) {
       setNodes([...initialNodes]);
       setEdges([...initialEdges]);
     }
+    setTimeout(() => fitViewTestClick(), 0);
     // console.log("------ ", edges);
   });
 
@@ -500,71 +493,16 @@ function Flow(props) {
       console.log("nodesRerender edges : " + reRenderEdges);
     }
 
-    // for (let _edge of reRenderEdges) {
-    //   if (_edge.data.criticalPath === true) {
-    //     _edge.style = {
-    //       strokeWidth: 1,
-    //       stroke: "#FF0072",
-    //     };
-    //   } else {
-    //     _edge.style = {
-    //       strokeWidth: 1,
-    //       stroke: "#b1b1b7",
-    //     };
-    //   }
-    // }
-
-    // reRenderEdges
-    //   .filter((f) => f.data.criticalPath === true)
-    //   .forEach((e) => (e.animated = true));
-
-    // reRenderEdges.forEach((e) => {
-    //   if (e.data.criticalPath) {
-    //     e.animated = true;
-    //   } else {
-    //     e.animated = false;
-    //   }
-    // });
-    //   // debugger;
     setNodes(reRenderNodes);
     setEdges(reRenderEdges);
   });
 
-  // const onNodeRerenderClick = useCallback((e) => {
-  //   // console.log("onNodeRerenderClick start");
-  //   // console.log("nodes : ", nodes);
-  //   // console.log("edges : ", edges);
-  //   // // console.log("copiedNodes : ", copiedNodes);
-  //   // console.log("onNodeRerenderClick end");
-  //   // 첫노드 찾기, reRenderNodes 재구성
-  //   // const rootNode = nodes.find((n) => n.type === "cpmMain");
-
-  //   reRenderNodes = _.cloneDeep(nodes);
-  //   reRenderEdges = _.cloneDeep(edges);
-  //   nodesConnectEdges(reRenderEdges);
-
-  //   const rootNodeIndex = reRenderNodes.findIndex((n) => n.type === "cpmMain");
-  //   const rootNode = reRenderNodes[rootNodeIndex];
-
-  //   nodesRerender(rootNode, rootNodeIndex);
-  //   // debugger;
-  //   let leafNodes = reRenderNodes.filter(
-  //     (f) => f.targetNodes.length === 0 && f.prevNodes.length > 0
-  //   );
-  //   leafNodes.map((m) => (m.data.criticalPath = true));
-  //   if (leafNodes.length === 1) {
-  //     for (let l of leafNodes) {
-  //       // debugger;
-  //       reverseNodesRerender(l, reRenderEdges);
-  //     }
-  //     console.log("nodesRerender edges : " + reRenderEdges);
-  //   }
-
-  //   // debugger;
-
-  //   setNodes(reRenderNodes);
-  //   setEdges(reRenderEdges);
-  // });
+  const fitViewTestClick = useCallback(
+    (e) => {
+      reactflowInstance.fitView();
+    },
+    [reactflowInstance]
+  );
 
   window.interfaces.onGetNodesAndEdgesClick = onGetNodesAndEdgesClick;
   window.interfaces.onNodeRerenderClick = onNodeRerenderClick;
@@ -590,6 +528,41 @@ function Flow(props) {
     window.interfaces.onNodeRerenderClick();
   });
 
+  const onAdd = useCallback(() => {
+    const x = Math.random() * window.innerWidth - 100;
+    const y = Math.random() * window.innerHeight;
+    const newNode = {
+      id: getNodeId(),
+      type: "cpmEvent",
+      data: {
+        est: 1,
+        lst: 1,
+        blockName: "Event",
+        startDate: "2023-07-01",
+        endDate: "2023-07-01",
+      },
+      width: 70,
+      height: 55,
+      selected: false,
+      positionAbsolute: {
+        x: x,
+        y: y,
+      },
+      position: {
+        x: x,
+        y: y,
+      },
+      dragging: false,
+    };
+    setNodes((nds) => {
+      return [...nds, newNode];
+      // let _nds = nds;
+      // debugger;
+      // nds.concat(newNode);
+      // debugger;
+    });
+  }, [setNodes]);
+
   const onConnect = useCallback(
     (connection) => {
       // console.log("onConnect");
@@ -613,6 +586,11 @@ function Flow(props) {
 
     [nodes, setEdges]
   );
+  const { setViewport, zoomIn, zoomOut } = useReactFlow();
+
+  const handleTransform = useCallback(() => {
+    setViewport({ x: 0, y: 0, zoom: 1 }, { duration: 800 });
+  }, [setViewport]);
 
   return (
     <>
@@ -625,9 +603,11 @@ function Flow(props) {
         <button onClick={onGetNodesAndEdgesClick}>getNodes</button>
         <button onClick={onEdgesClear}>edgesClear</button>
         <button onClick={onDataNodeBind}>onDataChange</button>
+        <button onClick={fitViewTestClick}>fitview</button>
       </div>
 
-      <div style={{ width: "100vw", height: "100vh" }}>
+      {/* <div style={{ width: "100vw", height: "100vh" }}> */}
+      <div style={{ height: 800 }}>
         <ReactFlow
           {...props}
           nodes={nodes}
@@ -638,10 +618,44 @@ function Flow(props) {
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
           nodeTypes={nodeTypes}
-          minZoom={0.2}
+          // onLoad={(instance) => setTimeout(() => instance.fitView(), 0)}
+          onInit={onInit}
+          // onLoad={onLoad}
+          // minZoom={0.2}
           fitView
+          snapToGrid={true}
+          proOptions={{ hideAttribution: true }}
+          snapGrid={[25, 25]}
+          fitViewOptions={{ padding: 4 }}
+          // defaultViewport={{ x: 0, y: 0, zoom: 0.5 }}
+          // attributionPosition="top-right"
           style={rfStyle}
-        />
+        >
+          <Panel position="top-right">
+            <button onClick={() => zoomIn({ duration: 800 })}>zoom in</button>
+            <button onClick={() => zoomOut({ duration: 800 })}>zoom out</button>
+            <button onClick={handleTransform}>pan to center(0,0,1)</button>
+            <button onClick={() => onLayout("TB")}>vertical layout</button>
+            <button onClick={() => onLayout("LR")}>horizontal layout</button>
+            <button onClick={onDownImgClick}>Download Image</button>
+            <button onClick={onAdd}>Add Node</button>
+          </Panel>
+          <Controls />
+          {/* <Background
+            id="1"
+            gap={10}
+            color="#f1f1f1"
+            variant={BackgroundVariant.Lines}
+          />
+          <Background
+            id="2"
+            gap={100}
+            offset={1}
+            color="#ccc"
+            variant={BackgroundVariant.Lines}
+          /> */}
+        </ReactFlow>
+        {/* <Background variant="dots" gap={12} size={1} /> */}
       </div>
     </>
   );

@@ -12,10 +12,16 @@ function dateFormatMMDD(date) {
 
   return `${_month}/${_date}`;
 }
-function CustomNode2({ data, isConnectable }) {
+
+function CustomNod4({ data, isConnectable }) {
   return (
-    <div className="text-updater-node main">
-      <div className="custom-wrap">
+    <div className="triangle">
+      <Handle
+        type="target"
+        position={Position.Top}
+        isConnectable={isConnectable}
+      />
+      <div className="custom-wrap triangle-wrap">
         <div className="div1">{data.est}</div>
         <div className="div2">{data.lst}</div>
         <div className="div3">{data.blockName}</div>
@@ -32,4 +38,4 @@ function CustomNode2({ data, isConnectable }) {
   );
 }
 
-export default CustomNode2;
+export default CustomNod4;
