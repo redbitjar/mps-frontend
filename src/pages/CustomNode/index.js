@@ -142,6 +142,7 @@ let reRenderNodes = [];
 let reRenderEdges = [];
 let criticalPath = [];
 let originalData = {};
+let holidays = [];
 // copiedNodes = _.cloneDeep(initialNodes);
 
 function nodesConnectEdges2(edges) {
@@ -420,10 +421,11 @@ function Flow(props) {
   const onIdUpdate = useCallback((id) => {
     originalData.id = id;
   });
-  const onIFDataNodeBind = useCallback((nodes, edges, rawData) => {
+  const onIFDataNodeBind = useCallback((nodes, edges, rawData, hdays) => {
     let initialNodes = nodes || [];
     let initialEdges = edges || [];
     originalData = rawData || {};
+    holidays = hdays || [];
     // initialEdges
     //   .filter((f) => f.data && f.data.criticalPath === true)
     //   .forEach((e) => (e.animated = true));
