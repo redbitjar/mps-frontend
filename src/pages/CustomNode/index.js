@@ -173,7 +173,8 @@ function nodesRerender2(sourceNode, parentIndex) {
   let _targetNodeIds = targetEdges.map((m) => m.target);
   let _targetNodes = [];
   _targetNodeIds.forEach((_ids) => {
-    _targetNodes.push(reRenderNodes.find((f) => f.data.blockName === _ids));
+    // _targetNodes.push(reRenderNodes.find((f) => f.data.blockName === _ids));
+    _targetNodes.push(reRenderNodes.find((f) => f.id === _ids));
   });
 
   _targetNodes.forEach((_targetNode, _idx) => {
@@ -191,7 +192,8 @@ function nodesRerender2(sourceNode, parentIndex) {
     let _prevNodeIds = tPrevEdges.map((m) => m.source);
     let _tPrevNodes = [];
     _prevNodeIds.forEach((_ids) => {
-      _tPrevNodes.push(reRenderNodes.find((f) => f.data.blockName === _ids));
+      // _tPrevNodes.push(reRenderNodes.find((f) => f.data.blockName === _ids));
+      _tPrevNodes.push(reRenderNodes.find((f) => f.id === _ids));
     });
 
     _tPrevNodes.forEach((_tPrevNode, _tPrevIdx) => {
@@ -237,7 +239,8 @@ function reverseNodesRerender(sourceNode, edges) {
     let _prevNodeIds = tPrevEdges.map((m) => m.source);
     let _tPrevNodes = [];
     _prevNodeIds.forEach((_ids) => {
-      _tPrevNodes.push(reRenderNodes.find((f) => f.data.blockName === _ids));
+      // _tPrevNodes.push(reRenderNodes.find((f) => f.data.blockName === _ids));
+      _tPrevNodes.push(reRenderNodes.find((f) => f.id === _ids));
     });
     needVisit = [...needVisit, ..._tPrevNodes];
     // 큐에 이전 노드 입력 끝
@@ -250,7 +253,8 @@ function reverseNodesRerender(sourceNode, edges) {
 
       for (let _targetEdge of tTargetEdges) {
         let _tNode = reRenderNodes.find(
-          (f) => f.data.blockName === _targetEdge.target
+          // (f) => f.data.blockName === _targetEdge.target
+          (f) => f.id === _targetEdge.target
         );
         if (
           _node.data.est + Number(_targetEdge.data.label) === _tNode.data.est &&
@@ -269,7 +273,8 @@ function reverseNodesRerender(sourceNode, edges) {
         let minDate = new Date(8640000000000000);
         for (let _targetEdge of tTargetEdges) {
           let _tNode = reRenderNodes.find(
-            (f) => f.data.blockName === _targetEdge.target
+            // (f) => f.data.blockName === _targetEdge.target
+            (f) => f.id === _targetEdge.target
           );
           const { label: targetLabel } = _targetEdge.data;
           const { lst: targetLst, endDate: targetEndDate } = _tNode.data;
@@ -324,8 +329,8 @@ function Flow(props) {
         // setTimeout(() => fitViewTestClick(), 0);
       }
 
-      cnt++;
-      setNodes([...initialNodes]);
+      // cnt++;
+      // setNodes([...initialNodes]);
     },
     [props.nodes, props.edges, setNodes, setEdges, reactflowInstance]
   );
@@ -337,8 +342,11 @@ function Flow(props) {
 
       setNodes([...layoutedNodes]);
       setEdges([...layoutedEdges]);
+      debugger;
+      // fitViewTestClick();
+      setTimeout(() => reactflowInstance.fitView(), 0.5);
     },
-    [nodes, edges]
+    [nodes, edges, reactflowInstance]
   );
 
   const onDownImgClick = useCallback(() => {
@@ -416,9 +424,9 @@ function Flow(props) {
     let initialNodes = nodes || [];
     let initialEdges = edges || [];
     originalData = rawData || {};
-    initialEdges
-      .filter((f) => f.data && f.data.criticalPath === true)
-      .forEach((e) => (e.animated = true));
+    // initialEdges
+    //   .filter((f) => f.data && f.data.criticalPath === true)
+    //   .forEach((e) => (e.animated = true));
     // initialEdges.forEach((e) => (e.data.onChange = onChange));
     initialEdges.forEach((e) => {
       if (e.data) e.data.onChange = onChange;
@@ -499,6 +507,7 @@ function Flow(props) {
 
   const fitViewTestClick = useCallback(
     (e) => {
+      debugger;
       reactflowInstance.fitView();
     },
     [reactflowInstance]
@@ -535,24 +544,26 @@ function Flow(props) {
       id: getNodeId(),
       type: "cpmEvent",
       data: {
-        est: 1,
-        lst: 1,
+        est: 0,
+        lst: 0,
         blockName: "Event",
-        startDate: "2023-07-01",
-        endDate: "2023-07-01",
+        startDate: "",
+        endDate: "",
       },
       width: 70,
       height: 55,
       selected: false,
       positionAbsolute: {
-        x: x,
-        y: y,
+        x: 0,
+        y: 0,
       },
       position: {
-        x: x,
-        y: y,
+        x: 0,
+        y: 0,
       },
       dragging: false,
+      targetEdges: [],
+      prevEdges: [],
     };
     setNodes((nds) => {
       return [...nds, newNode];
@@ -632,13 +643,13 @@ function Flow(props) {
           style={rfStyle}
         >
           <Panel position="top-right">
-            <button onClick={() => zoomIn({ duration: 800 })}>zoom in</button>
+            {/* <button onClick={() => zoomIn({ duration: 800 })}>zoom in</button>
             <button onClick={() => zoomOut({ duration: 800 })}>zoom out</button>
-            <button onClick={handleTransform}>pan to center(0,0,1)</button>
-            <button onClick={() => onLayout("TB")}>vertical layout</button>
-            <button onClick={() => onLayout("LR")}>horizontal layout</button>
-            <button onClick={onDownImgClick}>Download Image</button>
-            <button onClick={onAdd}>Add Node</button>
+            <button onClick={handleTransform}>pan to center(0,0,1)</button> */}
+            <button onClick={() => onLayout("TB")}>위아래 정렬</button>
+            <button onClick={() => onLayout("LR")}>왼쪽오른쪽 정렬</button>
+            <button onClick={onDownImgClick}>다운로드</button>
+            <button onClick={onAdd}>이벤트 추가</button>
           </Panel>
           <Controls />
           {/* <Background

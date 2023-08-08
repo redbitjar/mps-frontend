@@ -1,11 +1,11 @@
 .text-updater-node {
   height: 60px;
   width: 60px;
-  border: 1px solid #FF9B9B;
+  border: 1px solid #ff9b9b;
   /* padding: 5px; */
   /* border-radius: 50%; */
   background: white;
-  font-family: 'Nanum Gothic', sans-serif;
+  font-family: "Nanum Gothic", sans-serif;
   font-size: 4px;
 }
 
@@ -16,41 +16,49 @@
   /* grid-template-rows: repeat(3, minmax(15px, auto)); */
 }
 
-.div1{
+.div1 {
   border-bottom: 1px solid #eee;
   border-right: 1px solid #eee;
   font-size: 4px;
   padding: 5px;
   text-align: right;
 }
-.div2{
+.div2 {
   border-bottom: 1px solid #eee;
   /* border-left: 1px solid #eee; */
   font-size: 4px;
   padding: 5px;
   text-align: left;
 }
-.div3{
-  border-bottom: 1px solid #eee;  
+.div3 {
+  border-bottom: 1px solid #eee;
   font-size: 4px;
   padding: 5px;
   text-align: center;
   font-weight: bold;
 }
-.div4{
+.div4 {
   /* border-bottom: 1px solid #eee; */
   border-right: 1px solid #eee;
   font-size: 4px;
   padding-top: 3px;
   text-align: right;
 }
-.div5{
+.div5 {
   /* border-bottom: 1px solid #eee; */
   /* border-left: 1px solid #eee; */
   font-size: 4px;
   padding-top: 3px;
   text-align: left;
 }
+
+.div6 {
+  border: none;
+}
+.div7 {
+  text-align: center;
+}
+
 /* .div1,
 .div2,
 .div3,
@@ -80,15 +88,15 @@
   border: none;
   text-align: center;
 }
-.triangle{
-    width: 0px;
-    height: 0px;
-    border-top: 60px solid none;
-    border-left: 60px solid transparent;
-    border-right: 60px solid transparent;
-    border-bottom: 60px solid blue;
+.triangle {
+  width: 0px;
+  height: 0px;
+  border-top: 60px solid none;
+  border-left: 60px solid transparent;
+  border-right: 60px solid transparent;
+  border-bottom: 60px solid #acfadf;
 }
-.triangle-wrap{
+.triangle-wrap {
   position: relative;
   left: -30px;
 }
@@ -101,8 +109,7 @@
   
   } */
 
-
-  /* .react-flow__node-cpmMain {
+/* .react-flow__node-cpmMain {
     font-size: 8px;
     background: #eee;
     border: 1px solid #555;
@@ -110,4 +117,3 @@
     text-align: center;
     border-radius: 50%;
   } */
-  

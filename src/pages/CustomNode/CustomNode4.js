@@ -22,11 +22,15 @@ function CustomNod4({ data, isConnectable }) {
         isConnectable={isConnectable}
       />
       <div className="custom-wrap triangle-wrap">
-        <div className="div1">{data.est}</div>
-        <div className="div2">{data.lst}</div>
-        <div className="div3">{data.blockName}</div>
-        <div className="div4">{dateFormatMMDD(data.startDate)}</div>
-        <div className="div5">{dateFormatMMDD(data.endDate)}</div>
+        <div className="div1 div6">{data.est}</div>
+        <div className="div2 div6">{data.lst}</div>
+        <div className="div3 div6">{data.blockName}</div>
+        <div className="div4 div6 div7">
+          {data.startDate && dateFormatMMDD(data.startDate)}
+        </div>
+        <div className="div5 div6 div7">
+          {data.endDate && dateFormatMMDD(data.endDate)}
+        </div>
       </div>
       <Handle
         type="source"
