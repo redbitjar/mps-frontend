@@ -7,7 +7,10 @@ import reportWebVitals from "./reportWebVitals";
 import { BrowserRouter } from "react-router-dom";
 // import App2 from "./App2";
 // import MountedConnectionMain from "./pages/beforePlan/MountedConnectionMain";
+
+import "./styles.css";
 import CustomNode from "./pages/CustomNode/";
+import FlotingNode from "./pages/FlotingNode/";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
@@ -15,7 +18,8 @@ root.render(
   <BrowserRouter>
     {/* <App /> */}
     {/* <App2 /> */}
-    <CustomNode />
+    {/* <CustomNode /> */}
+    <FlotingNode />
   </BrowserRouter>
   //  {/* </React.StrictMode> */}
   // <MountedConnectionMain />
