@@ -111,6 +111,7 @@ const calcDateReverse = (toDate, label) => {
   let _toDate = toDate;
   let _label = label;
   let count = 0;
+  if (_label === 0) return toDate;
   _toDate.setDate(_toDate.getDate() - 1);
   while (true) {
     if (_label === 0) {
@@ -135,6 +136,36 @@ const calcDateReverse = (toDate, label) => {
     }
   }
   return _toDate;
+};
+const calcDateNext = (fromDate, label) => {
+  let _fromDate = fromDate;
+  let _label = label;
+  let count = 0;
+  if (_label === 0) return _fromDate;
+  _fromDate.setDate(_fromDate.getDate() + 1);
+  while (true) {
+    if (_label === 0) {
+      break;
+    } else {
+      let tmp = _fromDate.getDay();
+      if (tmp === 0 || tmp === 6) {
+        count++;
+        _fromDate.setDate(_fromDate.getDate() + 1);
+        // date2.setDate(date2.getDate() + 1);
+        // continue;
+      } else if (
+        holidays.findIndex((h) => h.getTime() == _fromDate.getTime()) > -1
+      ) {
+        count++;
+        _fromDate.setDate(_fromDate.getDate() + 1);
+        // continue;
+      } else {
+        _label--;
+        if (_label > 0) _fromDate.setDate(_fromDate.getDate() + 1);
+      }
+    }
+  }
+  return _fromDate;
 };
 const calcDate = (fromDate, toDate) => {
   //   let t =  new Date(holidays[12]);
@@ -293,9 +324,10 @@ function finalNodeRerender(sourceNode, parentIndex) {
       _tempDate.setDate(_tempDate.getDate() + addDate);
 
       // debugger;
-      // maxEst = _tempEst > maxEst ? _tempEst : maxEst;
-      // maxLst = _tempLst > maxLst ? _tempLst : maxLst;
-      if (_tempDate.getTime() >= maxDate.getTime()) {
+      maxEst = _tempEst > maxEst ? _tempEst : maxEst;
+      maxLst = _tempLst > maxLst ? _tempLst : maxLst;
+      // if (_tempDate.getTime() >= maxDate.getTime()) {
+      if (_tempEst >= maxEst) {
         _prestartDate = prestartDate;
         maxDate = _tempDate;
         maxEst = _tempEst;
@@ -303,8 +335,6 @@ function finalNodeRerender(sourceNode, parentIndex) {
       }
     });
 
-    // let _tStartDate = sourceNode.data.startDate.split("-");
-    // _tStartDate = new Date(_tStartDate[0], _tStartDate[1] - 1, _tStartDate[2]);
     if (_sStartDate.getTime() >= maxDate.getTime()) {
       sourceNode.data = {
         ...sourceNode.data,
@@ -315,17 +345,12 @@ function finalNodeRerender(sourceNode, parentIndex) {
       };
     } else {
       confirmAlert({
-        // title: "Confirm to submit",
         message: "완료일을 넘을 수 없습니다",
         buttons: [
           {
             label: "확인",
             onClick: () => selectedEdgeInput.target.focus(),
           },
-          // {
-          //   label: "No",
-          //   // onClick: () => alert("Click No"),
-          // },
         ],
       });
       isFinalDateOver = true;
@@ -395,10 +420,12 @@ function nodesRerender2(sourceNode, parentIndex) {
         ? prestartDate.split("-")
         : "1970-01-01".split("-");
       const _tempPreDate = new Date(_d[0], _d[1] - 1, _d[2]);
-      const _tempDate = new Date(_d[0], _d[1] - 1, _d[2]);
-      _tempDate.setDate(_tempDate.getDate() + Number(prevLabel || 0));
-      let addDate = calcDate(_tempPreDate, _tempDate);
-      _tempDate.setDate(_tempDate.getDate() + addDate);
+      let _tempDate = new Date(_d[0], _d[1] - 1, _d[2]);
+      // _tempDate.setDate(_tempDate.getDate() + Number(prevLabel || 0));
+      // let addDate = calcDate(_tempPreDate, _tempDate);
+      // _tempDate.setDate(_tempDate.getDate() + addDate);
+
+      _tempDate = calcDateNext(_tempPreDate, Number(prevLabel || 0));
 
       // maxEst = _tempEst > maxEst ? _tempEst : maxEst;
       // maxLst = _tempLst > maxLst ? _tempLst : maxLst;
@@ -977,6 +1004,23 @@ function Flow(props) {
         // setNodes(reRenderNodes);
         // },300);
       } else {
+        if (!source.data.startDate) {
+          confirmAlert({
+            // title: "Confirm to submit",
+            message: "이전 블록 일자가 정해지지 않았습니다.",
+            buttons: [
+              {
+                label: "확인",
+                // onClick: () => alert("Click Yes"),
+              },
+              // {
+              //   label: "No",
+              //   // onClick: () => alert("Click No"),
+              // },
+            ],
+          });
+          return;
+        }
         connection.data = {
           ...connection.data,
           label: btDay,
@@ -1073,7 +1117,7 @@ function Flow(props) {
 
   return (
     <>
-      {/* <div>
+      <div>
         <button onClick={onNodeRerenderClick}>reRender</button>
         <button onClick={onGetNodesAndEdgesClick}>getNodes</button>
         <button onClick={onEdgesClear}>edgesClear</button>
@@ -1081,7 +1125,7 @@ function Flow(props) {
         <button onClick={fitViewTestClick}>fitview</button>
         <button onClick={submit}>confirm</button>
         <button onClick={onInputFocus}>focus</button>
-      </div> */}
+      </div>
       {/* <div>
         <button onClick={submit}>confirm</button>
       </div> */}
@@ -1106,10 +1150,10 @@ function Flow(props) {
           <button onClick={fitViewTestClick}>fitView</button>
           <button onClick={() => zoomIn({ duration: 800 })}>zoom in</button>
           <button onClick={() => zoomOut({ duration: 800 })}>zoom out</button>
-          <button onClick={handleTransform}>pan to center(0,0,1)</button>
-          <button onClick={() => onLayout("TB")}>vertical layout</button>
-          <button onClick={() => onLayout("LR")}>horizontal layout</button>
-          <button onClick={onDownImgClick}>Download Image</button>
+          {/* <button onClick={handleTransform}>pan to center(0,0,1)</button> */}
+          {/* <button onClick={() => onLayout("TB")}>vertical layout</button>
+          <button onClick={() => onLayout("LR")}>horizontal layout</button> */}
+          {/* <button onClick={onDownImgClick}>Download Image</button> */}
           <button onClick={onAdd}>Add Node</button>
         </Panel>
         {/* <Controls /> */}
