@@ -11,6 +11,7 @@ import { BrowserRouter } from "react-router-dom";
 import "./styles.css";
 import CustomNode from "./pages/CustomNode/";
 import FlotingNode from "./pages/FlotingNode/";
+import TreeMapNode from "./pages/TreeMapNode/";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
@@ -19,7 +20,8 @@ root.render(
     {/* <App /> */}
     {/* <App2 /> */}
     {/* <CustomNode /> */}
-    <FlotingNode />
+    {/* <FlotingNode /> */}
+    <TreeMapNode />
   </BrowserRouter>
   //  {/* </React.StrictMode> */}
   // <MountedConnectionMain />
