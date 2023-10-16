@@ -558,6 +558,7 @@ function downloadImage(dataUrl) {
   const a = document.createElement("a");
 
   a.setAttribute("download", "reactflow.png");
+  debugger;
   a.setAttribute("href", dataUrl);
   a.click();
 }
@@ -659,7 +660,8 @@ function Flow(props) {
         height: imageHeight,
         transform: `translate(${transform[0]}px, ${transform[1]}px) scale(${transform[2]})`,
       },
-    }).then(downloadImage);
+    }).then(window.interfaces.onDownImg);
+    // }).then(downloadImage);
   });
 
   const onEdgeInputClick = useCallback((e, edges) => {
@@ -1104,6 +1106,8 @@ function Flow(props) {
     [nodes, edges, setEdges]
   );
 
+  // window.interfaces.onDownImg = downloadImage
+  window.interfaces.onDownImgClick = onDownImgClick;
   window.interfaces.onGetNodesAndEdgesClick = onGetNodesAndEdgesClick;
   window.interfaces.onNodeRerenderClick = onNodeRerenderClick;
   window.interfaces.onDataNodeBind = onIFDataNodeBind;
@@ -1153,7 +1157,7 @@ function Flow(props) {
           {/* <button onClick={handleTransform}>pan to center(0,0,1)</button> */}
           {/* <button onClick={() => onLayout("TB")}>vertical layout</button>
           <button onClick={() => onLayout("LR")}>horizontal layout</button> */}
-          {/* <button onClick={onDownImgClick}>Download Image</button> */}
+          <button onClick={onDownImgClick}>Download Image</button>
           <button onClick={onAdd}>Add Node</button>
         </Panel>
         {/* <Controls /> */}

@@ -135,7 +135,7 @@ function TreeMap(props) {
         />
         <Background
           id="2"
-          gap={100}
+          gap={10}
           // gap={10}
           offset={1}
           color="#ccc"

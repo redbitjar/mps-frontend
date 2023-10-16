@@ -20,8 +20,8 @@ root.render(
     {/* <App /> */}
     {/* <App2 /> */}
     {/* <CustomNode /> */}
-    {/* <FlotingNode /> */}
-    <TreeMapNode />
+    <FlotingNode />
+    {/* <TreeMapNode /> */}
   </BrowserRouter>
   //  {/* </React.StrictMode> */}
   // <MountedConnectionMain />
